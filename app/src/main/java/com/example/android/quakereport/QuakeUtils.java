@@ -18,6 +18,7 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by HP on 3/13/2017.
@@ -140,7 +141,7 @@ public final class QuakeUtils {
                 long timeinms = Long.parseLong(time);
                 Date date = new Date(timeinms);
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("MMM DD, yyyy\nhh:mm");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("LLL dd, yyyy\nh:mm a" , Locale.getDefault());
                 String displayDate = dateFormat.format(date);
 
 

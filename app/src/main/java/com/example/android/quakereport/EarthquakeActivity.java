@@ -15,7 +15,9 @@
  */
 package com.example.android.quakereport;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,7 +30,7 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<Information>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
     private static final String USGS_REQUEST_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=10";
@@ -54,7 +56,7 @@ public class EarthquakeActivity extends AppCompatActivity {
             }
         });
 
-        new EarthquakeAsyncTask().execute(USGS_REQUEST_URL);
+        getLoaderManager().initLoader(0 , null , this);
     }
 
     private void updateUi(final ArrayList<Information> earthquakes) {
@@ -66,23 +68,24 @@ public class EarthquakeActivity extends AppCompatActivity {
         // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
         // data set. This will trigger the ListView to update.
         if (earthquakes != null && !earthquakes.isEmpty()) {
-                       adapter.addAll(earthquakes);
+                adapter.addAll(earthquakes);
+                adapter.notifyDataSetChanged();
         }
 
     }
 
-    private class EarthquakeAsyncTask extends AsyncTask<String , Void , ArrayList<Information>> {
+    @Override
+    public Loader<ArrayList<Information>> onCreateLoader(int id, Bundle args) {
+        return new EarthquakeLoader(this , USGS_REQUEST_URL);
+    }
 
-        @Override
-        protected ArrayList<Information> doInBackground(String... params) {
-            if(params.length<1 || params[0]==null)
-                return null;
-            return QuakeUtils.extractEarthquakes(params[0]);
-        }
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Information>> loader, ArrayList<Information> data) {
+        updateUi(data);
+    }
 
-        @Override
-        protected void onPostExecute(ArrayList<Information> informations) {
-            updateUi(informations);
-        }
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Information>> loader) {
+        adapter.clear();
     }
 }
